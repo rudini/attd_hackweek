@@ -6,7 +6,7 @@
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L -e ts -x \"./node_modules/.bin/ts-node\" ./server.ts",
     "start_inspect": "nodemon -L --exec \"node --inspect=0.0.0.0:9229 -r ts-node/register\" ./server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +15,14 @@
   },
   "devDependencies": {
     "@types/express": "^4.16.0",
+    "@types/jest": "^23.3.8",
+    "jest": "^23.6.0",
+    "jest-preset-typescript": "^1.2.0",
     "nodemon": "^1.18.4",
+    "ts-jest": "^23.10.4",
     "ts-node": "^7.0.1"
+  },
+  "jest": {
+    "preset": "jest-preset-typescript"
   }
 }
