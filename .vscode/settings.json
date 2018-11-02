@@ -1,0 +1,16 @@
+{
+    "cucumberautocomplete.steps": ["client/cypress/support/step_definitions/**/*.js"],
+    "cucumberautocomplete.syncfeatures": "client/cypress/integration/*.feature",
+    "[feature]": {
+        "editor.quickSuggestions": {
+            "comments": false,
+            "strings": true,
+            "other": true
+        }
+    },
+    "editor.quickSuggestions": {
+        "comments": false,
+        "strings": true,
+        "other": true
+    }
+}
