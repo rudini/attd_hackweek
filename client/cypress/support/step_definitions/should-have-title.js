@@ -1,6 +1,6 @@
-/** @typedef {import('cypress')} */
-const {given, when, then} = require('cypress-cucumber-preprocessor/resolveStepDefinition')
+/// <reference types="cypress"/>
+/// <reference types="cucumber"/>
 
-then('I see {string} in the title', title => {
+Then('I see {string} in the title', title => {
     cy.title().should('include', title);
 });
