@@ -16,3 +16,6 @@ When('I search for {string}', searchstring => {
     cy.get('#lst-ib').type(searchstring);
     cy.get(':nth-child(1) > .lsbb > .lsb').click();
 });
+
+// Example for table data
+// https://stackoverflow.com/questions/40871977/cucumberjs-data-tables-how-to-turn-it-to-raw

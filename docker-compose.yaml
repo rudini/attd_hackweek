@@ -1,0 +1,17 @@
+# use version 3 of the docker compose syntax
+version: '3'
+services:
+  db:
+    image: mongo:latest
+    container_name: mongo_db
+    environment:
+          - MONGO_DATA_DIR=/data/db
+          - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - mongodb_volume:/data/db
+    ports:
+      - "27017:27017"
+      - "28017:28017"
+volumes:
+  mongodb_volume:
+    driver: local
