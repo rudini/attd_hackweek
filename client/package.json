@@ -7,7 +7,11 @@
     "build": "ng build",
     "test": "jest",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "cypress:open": "concurrently \"ng serve\" \"cypress open\"",
+    "cypress:run": "cypress run",
+    "cypress:ci": "ng build --prod && run-p --race start:ci cypress:run",
+    "start:ci": "http-server ./dist/cypressTest -a localhost -p 8000 -c-1"
   },
   "private": true,
   "dependencies": {
@@ -43,6 +47,8 @@
     "@types/jest": "^23.3.7",
     "@types/node": "~8.9.4",
     "codelyzer": "~4.5.0",
+    "concurrently": "^4.0.1",
+    "http-server": "^0.11.1",
     "jest": "^23.6.0",
     "jest-preset-angular": "^6.0.1",
     "prettier": "^1.14.3",
