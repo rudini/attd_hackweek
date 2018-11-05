@@ -5,8 +5,8 @@ const url = 'https://www.google.com/?hl=en';
 
 // given is the same as beforeEach in traditional unit tests.
 Given('A Google page', () => {
-    cy.exec('npm run database:clean');
-    cy.visit(url);   
+    cy.cleanDatabase();
+    cy.visit(url);
 });
 
 When('I open Google page', () => {
