@@ -1,0 +1,14 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "database:dump": "cd ./tools/ && mongodump.exe --out ../data/dump --db lik",
+    "database:restore": "cd ./tools/ && mongorestore.exe --dir ../data/dump",
+    "database:drop": "cd ./tools/ && echo db.dropDatabase() | mongo lik"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}
