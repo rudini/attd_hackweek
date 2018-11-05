@@ -1,20 +1,24 @@
 {
-  "name": "atdd_hackweek",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {
-    "concurrently": "^4.0.1",
-    "typescript": "^3.1.5"
-  },
-  "scripts": {
-    "client": "cd ./client && npm start",
-    "server": "cd ./server && npm start",
-    "start": "./node_modules/.bin/concurrently \"npm run server\" \"npm run client\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "integrate": "cd ./client && npm run integrate"
-  },
-  "author": "",
-  "license": "ISC"
+    "name": "atdd_hackweek",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "dependencies": {},
+    "devDependencies": {
+        "concurrently": "^4.0.1",
+        "typescript": "^3.1.5",
+        "wait-for-mongodb": "^0.3.3",
+        "wait-on": "^3.1.0"
+    },
+    "scripts": {
+        "e2e:start": "wait-on -t 20000 http-get://localhost:4200 && wait-for-mongo mongodb://localhost:27017 5000 && cd e2e/ && cypress run --browser chrome",
+        "e2e": "concurrently -n client,server,docker,e2e \"npm:client\" \"npm:server\" \"docker-compose up\" \"npm:e2e:start\"",
+        "client": "cd ./client && npm start",
+        "server": "cd ./server && npm start",
+        "start": "./node_modules/.bin/concurrently \"npm run server\" \"npm run client\"",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "integrate": "cd ./client && npm run integrate"
+    },
+    "author": "",
+    "license": "ISC"
 }
