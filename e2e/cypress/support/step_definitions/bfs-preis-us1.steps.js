@@ -1,28 +1,34 @@
 /// <reference types="cypress"/>
 /// <reference types="cucumber"/>
 
-Given('ein Lohn von {float} CHF', lohn => {
-    throw Error('not yet implemented')
+Given('sei der Teuerungsrechner', () => {
+    cy.cleanDatabase();
+    cy.visit('/lik_rechner');
 });
 
-Given('ein Startdatum im {string}', startdatum => {
-    throw Error('not yet implemented');
+When('ein Lohn von {float} CHF', lohn => {
+    cy.get('[data-e2e="lohn"]').type(lohn);
 });
 
-Given('ein Zieldatum im {string}', zieldatum => {
-    throw Error('not yet implemented');
+When('ein Startdatum im {string}', startdatum => {
+    cy.get('[data-e2e="startdatum"]').type(startdatum);
 });
 
-When('ich die Teuerung für die Index-Basis: {string} berechne', index => {
-    throw Error('not yet implemented');
+When('ein Zieldatum im {string}', zieldatum => {
+    cy.get('[data-e2e="zieldatum"]').type(zieldatum);
+});
+
+When('ich die Teuerung für die Index-Basis: {string} berechne', indexbasis => {
+    cy.get('[data-e2e="indexbasis"]').type(indexbasis);
+    cy.get('[data-e2e="berechnen"]').click();
 });
 
 Then('wird ein Betrag von {float} CHF', betrag => {
-    throw Error('not yet implemented');
+    cy.get('[data-e2e="zielbetrag"]').should('match', betrag);
 });
 
 Then('eine Veränderung von {float} % angezeigt', veraenderung => {
-    throw Error('not yet implemented');
+    cy.get('[data-e2e="veraenderung"]').should('match', veraenderung);
 });
 
 Then('werden folgende Indexe aufgelistet', werte => {
