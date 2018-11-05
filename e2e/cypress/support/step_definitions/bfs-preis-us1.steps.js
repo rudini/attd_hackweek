@@ -6,7 +6,7 @@ Given('sei der Teuerungsrechner', () => {
     cy.visit('/lik_rechner');
 });
 
-When('ein Lohn von {float} CHF', lohn => {
+When('ich ein Lohn von {float} CHF', lohn => {
     cy.get('[data-e2e="lohn"]').type(lohn);
 });
 
@@ -18,8 +18,11 @@ When('ein Zieldatum im {string}', zieldatum => {
     cy.get('[data-e2e="zieldatum"]').type(zieldatum);
 });
 
-When('ich die Teuerung für die Index-Basis: {string} berechne', indexbasis => {
+When('eine Teuerung für die Index-Basis: {string} eingebe', indexbasis => {
     cy.get('[data-e2e="indexbasis"]').type(indexbasis);
+});
+
+When('die Teuerung berechne', _ => {
     cy.get('[data-e2e="berechnen"]').click();
 });
 
