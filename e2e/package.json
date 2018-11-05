@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "database:clean": "cd ../database && npm run database:drop && npm run database:restore"
   },
   "author": "",
   "license": "ISC",
