@@ -1,6 +1,6 @@
 {
-    "cucumberautocomplete.steps": ["client/cypress/support/step_definitions/**/*.js"],
-    "cucumberautocomplete.syncfeatures": "client/cypress/integration/*.feature",
+    "cucumberautocomplete.steps": ["e2e/cypress/support/step_definitions/**/*.js"],
+    "cucumberautocomplete.syncfeatures": "e2e/cypress/integration/*.feature",
     "[feature]": {
         "editor.quickSuggestions": {
             "comments": false,
