@@ -18,8 +18,7 @@ export type TeuerungsrechnerStore = {
     result: any;
 };
 
-// move to test libs
-const mockActions = <T>(record: T) => unionize(record, 'type', 'payload');
+const unionizeActions = <T>(record: T) => unionize(record, 'type', 'payload');
 
 export const teuerungsrechnerActionsRecord = {
     datenLaden: ofType<null>(),
@@ -27,7 +26,7 @@ export const teuerungsrechnerActionsRecord = {
     berechne: ofType<null>(),
 };
 
-const TeuerungsrechnerActions = mockActions(teuerungsrechnerActionsRecord);
+const TeuerungsrechnerActions = unionizeActions(teuerungsrechnerActionsRecord);
 
 export class MockStore {
     constructor(private selectorMap: { selector: any; value: Observable<any> }[] = []) {}
