@@ -1,7 +1,6 @@
 import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { ofType } from 'src/app/shared/redux-builder';
-import { unionize } from 'unionize';
+import { unionize, ofType } from 'unionize';
 import { EventEmitter } from '@angular/core';
 import { map, mapTo, withLatestFrom, filter } from 'rxjs/operators';
 import { ContainerComponent } from 'src/app/shared/reactive-component';
