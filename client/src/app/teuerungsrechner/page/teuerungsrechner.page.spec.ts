@@ -1,38 +1,14 @@
-import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { unionize, ofType } from 'unionize';
-import { EventEmitter } from '@angular/core';
-import { map, mapTo, withLatestFrom, filter } from 'rxjs/operators';
-import { ContainerComponent } from 'src/app/shared/reactive-component';
 import { cold } from 'jest-marbles';
-
-export interface BerechnungsParameter {
-    startdatum: string;
-    zieldatum: string;
-    indexbasis: string;
-    betrag: number;
-}
-
-export type TeuerungsrechnerStore = {
-    canBerechnen: boolean;
-    result: any;
-};
-
-const unionizeActions = <T>(record: T) => unionize(record, 'type', 'payload');
-
-export const teuerungsrechnerActionsRecord = {
-    datenLaden: ofType<null>(),
-    berechnungsParameterChanged: ofType<Partial<BerechnungsParameter>>(),
-    berechne: ofType<null>(),
-};
-
-const TeuerungsrechnerActions = unionizeActions(teuerungsrechnerActionsRecord);
+import { TeuerungsrechnerPageComponent } from './teuerungsrechner.page';
+import { BerechnungsParameterModel } from '../models';
+import { teuerungsrechnerSelectors } from '../+state/reducer';
+import { TeuerungsrechnerActions } from '../+state/actions';
 
 export class MockStore {
     constructor(private selectorMap: { selector: any; value: Observable<any> }[] = []) {}
 
     public dispatch(action: any): void {
-        console.log('dispatching from the mock store!');
     }
 
     public select(selector: any): Observable<any> {
@@ -43,12 +19,6 @@ export class MockStore {
         return cold('a', { a: {} });
     }
 }
-
-export const getTeuerungsrechnerState = createFeatureSelector<TeuerungsrechnerStore>('teuerungsrechner');
-export const teuerungsrechnerSelectors = {
-    getCanBerechnen: createSelector(getTeuerungsrechnerState, state => state.canBerechnen),
-    getResult: createSelector(getTeuerungsrechnerState, state => state.result),
-};
 
 // 1. load data => dispatch LoadDataAction | OK
 // 2. when inputs changes input as action on change => dispatch | OK
@@ -76,7 +46,7 @@ describe('teuerungsrechner page', () => {
         const page = new TeuerungsrechnerPageComponent(store);
 
         // Act
-        const parameters: Partial<BerechnungsParameter> = {};
+        const parameters: Partial<BerechnungsParameterModel> = {};
         page.parameterChanged$.emit(parameters);
 
         // Assert
@@ -130,34 +100,3 @@ describe('teuerungsrechner page', () => {
         expect(page.result$).toBeObservable(cold('a', { a: {} }));
     });
 });
-
-// @Component({
-//     template: ''
-// })
-export class TeuerungsrechnerPageComponent extends ContainerComponent {
-    parameterChanged$ = new EventEmitter<Partial<BerechnungsParameter>>();
-    berechnen$ = new EventEmitter();
-
-    canBerechnen$: Observable<boolean>;
-    result$: Observable<any>;
-
-    constructor(private store: Store<any>) {
-        super(store.dispatch.bind(store));
-
-        this.store.dispatch(TeuerungsrechnerActions.datenLaden(null));
-
-        this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
-        this.result$ = this.store.select(teuerungsrechnerSelectors.getResult);
-
-        this.dispatch(
-            this.parameterChanged$.pipe(
-                map(parameters => TeuerungsrechnerActions.berechnungsParameterChanged(parameters))
-            ),
-            this.berechnen$.pipe(
-                withLatestFrom(this.canBerechnen$),
-                filter(([_, canBerechnen]) => canBerechnen),
-                mapTo(TeuerungsrechnerActions.berechne(null))
-            )
-        );
-    }
-}
