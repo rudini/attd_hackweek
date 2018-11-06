@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { ofType, reduxBuilder } from 'src/app/shared/redux-builder';
+import { ofType } from 'src/app/shared/redux-builder';
+import { unionize } from 'unionize';
 
 type TeuerungsrechnerStore = {
 }
 
 // move to test libs
-var mockActions = <T>(record: T) => reduxBuilder().declareInitialState({})
-    .declareActions(record)
-    .actions;
+var mockActions = <T>(record: T) => 
+    unionize(record, 'type', 'payload');
 
 export const teuerungsrechnerActionsRecord = {
     loadData: ofType<null>()
