@@ -7,7 +7,7 @@ Given('sei der Teuerungsrechner', () => {
 });
 
 When('ich ein Lohn von {float} CHF', lohn => {
-    cy.get('[data-e2e="lohn"]').type(lohn);
+    cy.get('[data-e2e="betrag"]').type(lohn);
 });
 
 When('ein Startdatum im {string}', startdatum => {
