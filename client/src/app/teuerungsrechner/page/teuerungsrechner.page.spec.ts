@@ -1,10 +1,12 @@
-import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { ofType } from 'src/app/shared/redux-builder';
 import { unionize } from 'unionize';
 import { EventEmitter } from '@angular/core';
-import { takeUntil, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { ContainerComponent } from 'src/app/shared/reactive-component';
+import { ColdObservable } from 'jest-marbles/typings/src/rxjs/cold-observable';
+import { cold } from 'jest-marbles';
 
 export interface BerechnungsParameter {
     startdatum: string;
@@ -13,7 +15,9 @@ export interface BerechnungsParameter {
     betrag: number;
 }
 
-export type TeuerungsrechnerStore = {};
+export type TeuerungsrechnerStore = {
+    canBerechnen: boolean;
+};
 
 // move to test libs
 var mockActions = <T>(record: T) => unionize(record, 'type', 'payload');
@@ -26,20 +30,28 @@ export const teuerungsrechnerActionsRecord = {
 const TeuerungsrechnerActions = mockActions(teuerungsrechnerActionsRecord);
 
 export class MockStore {
-    public dispatch(obj): void {
+    constructor(private onSelect?: ColdObservable) {
+    }
+
+    public dispatch(action: any): void {
         console.log('dispatching from the mock store!');
     }
 
-    public select(obj): Observable<{}> {
+    public select(selector: ()=> any): ColdObservable {
         console.log('selecting from the mock store!');
-        return of({});
+        return this.onSelect ? this.onSelect : cold('a', {a: {}});
     }
 }
 
+export const getTeuerungsrechnerState = createFeatureSelector<TeuerungsrechnerStore>('teuerungsrechner');
+export const teuerungsrechnerSelectors = {
+    getCanBerechnen: createSelector(getTeuerungsrechnerState, state => state.canBerechnen),
+};
+
 // 1. load data => dispatch LoadDataAction | OK
 // 2. when inputs changes input as action on change => dispatch | OK
-// 3. if ok? => berechnen => select
-// 3.1. calculate => dispatch
+// 3. if ok? => berechnen => select | OK
+// 3.1. calculate => dispatch (only if canBerechnen is true) !! negative test
 // 3.2. model binding (resultat) => select
 describe('teuerungsrechner page', () => {
     it('Should load data on create', () => {
@@ -67,6 +79,16 @@ describe('teuerungsrechner page', () => {
         // Assert
         expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechnungsParameterChanged(parameters));
     });
+
+    it('should update canBerechnen when the selector in the store has changed', () => {
+        
+        // Arrange
+        var store: any = new MockStore(cold('a'));
+        var page = new TeuerungsrechnerPageComponent(store);
+
+        // Act
+        expect(page.canBerechnen$).toBeMarble('a');
+    });
 });
 
 // @Component({
@@ -74,6 +96,7 @@ describe('teuerungsrechner page', () => {
 // })
 export class TeuerungsrechnerPageComponent extends ContainerComponent {
     parameterChanged$ = new EventEmitter<Partial<BerechnungsParameter>>();
+    canBerechnen$: Observable<boolean>;
 
     constructor(private store: Store<any>) {
         super(store.dispatch.bind(store));
@@ -85,5 +108,7 @@ export class TeuerungsrechnerPageComponent extends ContainerComponent {
                 map(parameters => TeuerungsrechnerActions.berechnungsParameterChanged(parameters))
             )
         );
+
+        this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
     }
 }
