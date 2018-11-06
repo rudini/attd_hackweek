@@ -1,4 +1,4 @@
-import { TestBed, getTestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -32,8 +32,7 @@ describe('teuerungsrechner effects tests', () => {
             imports: [HttpClientTestingModule],
             providers: [TeuerungsrechnerEffect, { provide: AppConfigService, useFactory: mockAppConfigService }, provideMockActions(() => actions)]
         });
-        injector = getTestBed();
-        httpMock = injector.get(HttpTestingController);
+        httpMock = TestBed.get(HttpTestingController);
         effect = TestBed.get(TeuerungsrechnerEffect);
     });
 
