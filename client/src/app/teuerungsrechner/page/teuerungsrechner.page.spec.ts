@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { ofType } from 'src/app/shared/redux-builder';
 import { unionize } from 'unionize';
 import { EventEmitter } from '@angular/core';
-import { map } from 'rxjs/operators';
+import { map, mapTo } from 'rxjs/operators';
 import { ContainerComponent } from 'src/app/shared/reactive-component';
 import { ColdObservable } from 'jest-marbles/typings/src/rxjs/cold-observable';
 import { cold } from 'jest-marbles';
@@ -23,8 +23,9 @@ export type TeuerungsrechnerStore = {
 var mockActions = <T>(record: T) => unionize(record, 'type', 'payload');
 
 export const teuerungsrechnerActionsRecord = {
-    loadData: ofType<null>(),
+    datenLaden: ofType<null>(),
     berechnungsParameterChanged: ofType<Partial<BerechnungsParameter>>(),
+    berechne: ofType<null>(),
 };
 
 const TeuerungsrechnerActions = mockActions(teuerungsrechnerActionsRecord);
@@ -51,7 +52,8 @@ export const teuerungsrechnerSelectors = {
 // 1. load data => dispatch LoadDataAction | OK
 // 2. when inputs changes input as action on change => dispatch | OK
 // 3. if ok? => berechnen => select | OK
-// 3.1. calculate => dispatch (only if canBerechnen is true) !! negative test
+// 3.1. calculate => dispatch (only if canBerechnen is true) | OK
+// 3.1. calculate => not dispatch (because canBerechnen is false)
 // 3.2. model binding (resultat) => select
 describe('teuerungsrechner page', () => {
     it('Should load data on create', () => {
@@ -63,7 +65,7 @@ describe('teuerungsrechner page', () => {
         new TeuerungsrechnerPageComponent(store);
 
         // Assert
-        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.loadData(null));
+        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.datenLaden(null));
     });
 
     it('Should trigger a change on input changes', () => {
@@ -86,9 +88,23 @@ describe('teuerungsrechner page', () => {
         var store: any = new MockStore(cold('a'));
         var page = new TeuerungsrechnerPageComponent(store);
 
-        // Act
+        // Act and assert
         expect(page.canBerechnen$).toBeMarble('a');
     });
+
+    it('should trigger calculate', () => {
+
+        // Arrange
+        var store: any = new MockStore();
+        var spy = jest.spyOn(store, 'dispatch');
+        var page = new TeuerungsrechnerPageComponent(store);
+
+        // Act
+        page.berechnen$.emit();
+        
+        // Assert
+        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null))
+    })
 });
 
 // @Component({
@@ -96,17 +112,20 @@ describe('teuerungsrechner page', () => {
 // })
 export class TeuerungsrechnerPageComponent extends ContainerComponent {
     parameterChanged$ = new EventEmitter<Partial<BerechnungsParameter>>();
+    berechnen$ = new EventEmitter();
+
     canBerechnen$: Observable<boolean>;
 
     constructor(private store: Store<any>) {
         super(store.dispatch.bind(store));
 
-        this.store.dispatch(TeuerungsrechnerActions.loadData(null));
+        this.store.dispatch(TeuerungsrechnerActions.datenLaden(null));
 
         this.dispatch(
             this.parameterChanged$.pipe(
                 map(parameters => TeuerungsrechnerActions.berechnungsParameterChanged(parameters))
-            )
+            ),
+            this.berechnen$.pipe(mapTo(TeuerungsrechnerActions.berechne(null)))
         );
 
         this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
