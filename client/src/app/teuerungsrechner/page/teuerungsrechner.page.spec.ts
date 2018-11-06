@@ -1,11 +1,10 @@
 import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ofType } from 'src/app/shared/redux-builder';
 import { unionize } from 'unionize';
 import { EventEmitter } from '@angular/core';
-import { map, mapTo } from 'rxjs/operators';
+import { map, mapTo, withLatestFrom, filter } from 'rxjs/operators';
 import { ContainerComponent } from 'src/app/shared/reactive-component';
-import { ColdObservable } from 'jest-marbles/typings/src/rxjs/cold-observable';
 import { cold } from 'jest-marbles';
 
 export interface BerechnungsParameter {
@@ -31,16 +30,15 @@ export const teuerungsrechnerActionsRecord = {
 const TeuerungsrechnerActions = mockActions(teuerungsrechnerActionsRecord);
 
 export class MockStore {
-    constructor(private onSelect?: ColdObservable) {
-    }
+    constructor(private onSelect?: Observable<any>) {}
 
     public dispatch(action: any): void {
         console.log('dispatching from the mock store!');
     }
 
-    public select(selector: ()=> any): ColdObservable {
+    public select(selector: () => any): Observable<any> {
         console.log('selecting from the mock store!');
-        return this.onSelect ? this.onSelect : cold('a', {a: {}});
+        return this.onSelect ? this.onSelect : cold('a', { a: {} });
     }
 }
 
@@ -53,7 +51,7 @@ export const teuerungsrechnerSelectors = {
 // 2. when inputs changes input as action on change => dispatch | OK
 // 3. if ok? => berechnen => select | OK
 // 3.1. calculate => dispatch (only if canBerechnen is true) | OK
-// 3.1. calculate => not dispatch (because canBerechnen is false)
+// 3.1. calculate => not dispatch (because canBerechnen is false) | OK
 // 3.2. model binding (resultat) => select
 describe('teuerungsrechner page', () => {
     it('Should load data on create', () => {
@@ -83,7 +81,6 @@ describe('teuerungsrechner page', () => {
     });
 
     it('should update canBerechnen when the selector in the store has changed', () => {
-        
         // Arrange
         var store: any = new MockStore(cold('a'));
         var page = new TeuerungsrechnerPageComponent(store);
@@ -93,18 +90,30 @@ describe('teuerungsrechner page', () => {
     });
 
     it('should trigger calculate', () => {
-
         // Arrange
-        var store: any = new MockStore();
+        var store: any = new MockStore(of(true));
         var spy = jest.spyOn(store, 'dispatch');
         var page = new TeuerungsrechnerPageComponent(store);
 
         // Act
         page.berechnen$.emit();
-        
+
         // Assert
-        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null))
-    })
+        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null));
+    });
+
+    it('should not trigger calculate when canBerechnen is false', () => {
+        // Arrange
+        var store: any = new MockStore(of(false));
+        var spy = jest.spyOn(store, 'dispatch');
+        var page = new TeuerungsrechnerPageComponent(store);
+
+        // Act
+        page.berechnen$.emit();
+
+        // Assert
+        expect(spy).not.toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null));
+    });
 });
 
 // @Component({
@@ -121,13 +130,17 @@ export class TeuerungsrechnerPageComponent extends ContainerComponent {
 
         this.store.dispatch(TeuerungsrechnerActions.datenLaden(null));
 
+        this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
+
         this.dispatch(
             this.parameterChanged$.pipe(
                 map(parameters => TeuerungsrechnerActions.berechnungsParameterChanged(parameters))
             ),
-            this.berechnen$.pipe(mapTo(TeuerungsrechnerActions.berechne(null)))
+            this.berechnen$.pipe(
+                withLatestFrom(this.canBerechnen$),
+                filter(([_, canBerechnen]) => canBerechnen),
+                mapTo(TeuerungsrechnerActions.berechne(null))
+            )
         );
-
-        this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
     }
 }
