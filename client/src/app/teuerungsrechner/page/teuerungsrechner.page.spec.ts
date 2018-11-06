@@ -16,10 +16,11 @@ export interface BerechnungsParameter {
 
 export type TeuerungsrechnerStore = {
     canBerechnen: boolean;
+    result: any;
 };
 
 // move to test libs
-var mockActions = <T>(record: T) => unionize(record, 'type', 'payload');
+const mockActions = <T>(record: T) => unionize(record, 'type', 'payload');
 
 export const teuerungsrechnerActionsRecord = {
     datenLaden: ofType<null>(),
@@ -30,21 +31,25 @@ export const teuerungsrechnerActionsRecord = {
 const TeuerungsrechnerActions = mockActions(teuerungsrechnerActionsRecord);
 
 export class MockStore {
-    constructor(private onSelect?: Observable<any>) {}
+    constructor(private selectorMap: { selector: any; value: Observable<any> }[] = []) {}
 
     public dispatch(action: any): void {
         console.log('dispatching from the mock store!');
     }
 
-    public select(selector: () => any): Observable<any> {
-        console.log('selecting from the mock store!');
-        return this.onSelect ? this.onSelect : cold('a', { a: {} });
+    public select(selector: any): Observable<any> {
+        const found = this.selectorMap.filter(x => x.selector === selector);
+        if (found.length !== 0) {
+            return found[0].value;
+        }
+        return cold('a', { a: {} });
     }
 }
 
 export const getTeuerungsrechnerState = createFeatureSelector<TeuerungsrechnerStore>('teuerungsrechner');
 export const teuerungsrechnerSelectors = {
     getCanBerechnen: createSelector(getTeuerungsrechnerState, state => state.canBerechnen),
+    getResult: createSelector(getTeuerungsrechnerState, state => state.result),
 };
 
 // 1. load data => dispatch LoadDataAction | OK
@@ -52,12 +57,12 @@ export const teuerungsrechnerSelectors = {
 // 3. if ok? => berechnen => select | OK
 // 3.1. calculate => dispatch (only if canBerechnen is true) | OK
 // 3.1. calculate => not dispatch (because canBerechnen is false) | OK
-// 3.2. model binding (resultat) => select
+// 3.2. model binding (resultat) => select | OK
 describe('teuerungsrechner page', () => {
     it('Should load data on create', () => {
         // Arrange
-        var store: any = new MockStore();
-        var spy = jest.spyOn(store, 'dispatch');
+        const store: any = new MockStore();
+        const spy = jest.spyOn(store, 'dispatch');
 
         // Act
         new TeuerungsrechnerPageComponent(store);
@@ -68,9 +73,9 @@ describe('teuerungsrechner page', () => {
 
     it('Should trigger a change on input changes', () => {
         // Arrange
-        var store: any = new MockStore();
-        var spy = jest.spyOn(store, 'dispatch');
-        var page = new TeuerungsrechnerPageComponent(store);
+        const store: any = new MockStore();
+        const spy = jest.spyOn(store, 'dispatch');
+        const page = new TeuerungsrechnerPageComponent(store);
 
         // Act
         const parameters: Partial<BerechnungsParameter> = {};
@@ -82,8 +87,8 @@ describe('teuerungsrechner page', () => {
 
     it('should update canBerechnen when the selector in the store has changed', () => {
         // Arrange
-        var store: any = new MockStore(cold('a'));
-        var page = new TeuerungsrechnerPageComponent(store);
+        const store: any = new MockStore([{ selector: teuerungsrechnerSelectors.getCanBerechnen, value: cold('a') }]);
+        const page = new TeuerungsrechnerPageComponent(store);
 
         // Act and assert
         expect(page.canBerechnen$).toBeMarble('a');
@@ -91,9 +96,9 @@ describe('teuerungsrechner page', () => {
 
     it('should trigger calculate', () => {
         // Arrange
-        var store: any = new MockStore(of(true));
-        var spy = jest.spyOn(store, 'dispatch');
-        var page = new TeuerungsrechnerPageComponent(store);
+        const store: any = new MockStore([{ selector: teuerungsrechnerSelectors.getCanBerechnen, value: of(true) }]);
+        const spy = jest.spyOn(store, 'dispatch');
+        const page = new TeuerungsrechnerPageComponent(store);
 
         // Act
         page.berechnen$.emit();
@@ -104,15 +109,27 @@ describe('teuerungsrechner page', () => {
 
     it('should not trigger calculate when canBerechnen is false', () => {
         // Arrange
-        var store: any = new MockStore(of(false));
-        var spy = jest.spyOn(store, 'dispatch');
-        var page = new TeuerungsrechnerPageComponent(store);
+        const store: any = new MockStore([{ selector: teuerungsrechnerSelectors.getCanBerechnen, value: of(false) }]);
+        const spy = jest.spyOn(store, 'dispatch');
+        const page = new TeuerungsrechnerPageComponent(store);
 
         // Act
         page.berechnen$.emit();
 
         // Assert
         expect(spy).not.toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null));
+    });
+
+    it('should update resultat model when calculated', () => {
+        // Arrange
+        const store: any = new MockStore([
+            { selector: teuerungsrechnerSelectors.getResult, value: cold('a', { a: {} }) },
+        ]);
+        const spy = jest.spyOn(store, 'dispatch');
+        const page = new TeuerungsrechnerPageComponent(store);
+
+        // Assert
+        expect(page.result$).toBeObservable(cold('a', { a: {} }));
     });
 });
 
@@ -124,6 +141,7 @@ export class TeuerungsrechnerPageComponent extends ContainerComponent {
     berechnen$ = new EventEmitter();
 
     canBerechnen$: Observable<boolean>;
+    result$: Observable<any>;
 
     constructor(private store: Store<any>) {
         super(store.dispatch.bind(store));
@@ -131,6 +149,7 @@ export class TeuerungsrechnerPageComponent extends ContainerComponent {
         this.store.dispatch(TeuerungsrechnerActions.datenLaden(null));
 
         this.canBerechnen$ = this.store.select(teuerungsrechnerSelectors.getCanBerechnen);
+        this.result$ = this.store.select(teuerungsrechnerSelectors.getResult);
 
         this.dispatch(
             this.parameterChanged$.pipe(
