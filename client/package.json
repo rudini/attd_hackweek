@@ -47,6 +47,7 @@
     "@types/cucumber": "^4.0.4",
     "@types/jest": "^23.3.7",
     "@types/node": "~8.9.4",
+    "@types/url-join": "^0.8.2",
     "codelyzer": "~4.5.0",
     "concurrently": "^4.0.1",
     "cypress": "^3.1.0",
@@ -62,6 +63,17 @@
   },
   "jest": {
     "preset": "jest-preset-angular",
-    "setupTestFrameworkScriptFile": "./src/setup-jest.ts"
+    "setupTestFrameworkScriptFile": "./src/setup-jest.ts",
+    "globals": {
+        "ts-jest": {
+            "tsConfigFile": "./src/tsconfig.spec.json"
+        },
+        "__TRANSFORM_HTML__": true
+    },
+    "moduleNameMapper": {
+        "^@shared/(.*)": "<rootDir>/src/app/shared/$1",
+        "^@teuerungsrechner/(.*)": "<rootDir>/src/app/teuerungsrechner/$1",
+        "^@core/(.*)": "<rootDir>/src/app/core/$1"
+    }
   }
 }

@@ -1,11 +1,11 @@
 import { EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store } from "@ngrx/store";
-import { ContainerComponent } from "src/app/shared/reactive-component";
 import { withLatestFrom, filter, mapTo, map } from "rxjs/operators";
 import { BerechnungsParameterModel } from "../models";
 import { TeuerungsrechnerActions } from "../+state/actions";
 import { teuerungsrechnerSelectors } from "../+state/reducer";
+import { ContainerComponent } from "@shared/reactive-component";
 
 // @Component({
 //     template: ''

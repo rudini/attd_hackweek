@@ -1,5 +1,6 @@
 import { BerechnungsParameterModel } from "../models";
-import { unionizeActions, ofType } from "src/app/shared/redux-builder/unionize-actions";
+import { ofType } from "@shared/redux-builder";
+import { unionizeActions } from "@shared/redux-builder/unionize-actions";
 
 export const teuerungsrechnerActionsRecord = {
     datenLaden: ofType<null>(),
