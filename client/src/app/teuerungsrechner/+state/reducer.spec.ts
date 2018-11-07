@@ -1,29 +1,44 @@
 import { reduxBuilder } from "@shared/redux-builder";
 import { teuerungsrechnerActionsRecord, TeuerungsrechnerActions } from "./actions";
 import { TeuerungsrechnerStore } from "./reducer";
+import { initial, loading } from "@shared/remote-data";
+import { none } from "fp-ts/lib/Option";
 
+// reducer impl 
+const initialState: TeuerungsrechnerStore = { datenLaden: initial, result: <any>{}, canBerechnen: false };
 
-const initialState = {
-}
-
-const built = reduxBuilder().declareInitialState(initialState)
+const built = reduxBuilder<TeuerungsrechnerStore>()
+    .declareInitialState(initialState)
     .declareActions(teuerungsrechnerActionsRecord)
-    .declareReducer(() => ({}));
+    .declareReducer(state => ({
+        applyDatenLaden: payload => ({ ...state, datenLaden: payload })
+    }));
 
-export const reducer = (state: TeuerungsrechnerStore, action: TeuerungsrechnerActions) => built.reducer(state, action);
+export function teuerungsrechnerReducer(state: any, action: any) {
+    return built.reducer(state, action);
+}
+// reducer impl end
 
 // Initialize data for datastore | OK
 // Daten geladen =>
-// -- loading
+// -- loading | OK
 // -- data
 // -- error
 // Parameter updates => set canBerechnen
 // Berechnen when all parameters are set
 describe('teuerungsrechner reducer tests', () => {
 
-    describe('on initialize', () => {
-        it('it should set the initial state', () => {
-            expect(reducer(undefined, {} as any)).toEqual(initialState);
-        })
-    })
+    describe('on load daten', () => {
+        it('it should set the loading state', () => {
+            expect(teuerungsrechnerReducer(undefined, TeuerungsrechnerActions.applyDatenLaden(loading)).datenLaden.loading).toEqual(true);
+        });
+
+        it('it should set the error to none', () => {
+            expect(teuerungsrechnerReducer(undefined, TeuerungsrechnerActions.applyDatenLaden(loading)).datenLaden.error).toEqual(none);
+        });
+
+        it('it should set the data to none', () => {
+            expect(teuerungsrechnerReducer(undefined, TeuerungsrechnerActions.applyDatenLaden(loading)).datenLaden.data).toEqual(none);
+        });
+    });
 });
