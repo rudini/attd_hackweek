@@ -27,12 +27,12 @@ export class TeuerungsrechnerPageComponent extends ContainerComponent {
 
         this.dispatch(
             this.parameterChanged$.pipe(
-                map(parameters => TeuerungsrechnerActions.berechnungsParameterChanged(parameters))
+                map(parameters => TeuerungsrechnerActions.applyBerechnungsParameterChanged(parameters))
             ),
             this.berechnen$.pipe(
                 withLatestFrom(this.canBerechnen$),
                 filter(([_, canBerechnen]) => canBerechnen),
-                mapTo(TeuerungsrechnerActions.berechne(null))
+                mapTo(TeuerungsrechnerActions.applyBerechne(null))
             )
         );
     }

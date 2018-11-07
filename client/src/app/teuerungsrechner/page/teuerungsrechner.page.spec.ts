@@ -50,7 +50,7 @@ describe('teuerungsrechner page', () => {
         page.parameterChanged$.emit(parameters);
 
         // Assert
-        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechnungsParameterChanged(parameters));
+        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.applyBerechnungsParameterChanged(parameters));
     });
 
     it('should update canBerechnen when the selector in the store has changed', () => {
@@ -72,7 +72,7 @@ describe('teuerungsrechner page', () => {
         page.berechnen$.emit();
 
         // Assert
-        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null));
+        expect(spy).toHaveBeenCalledWith(TeuerungsrechnerActions.applyBerechne(null));
     });
 
     it('should not trigger calculate when canBerechnen is false', () => {
@@ -85,7 +85,7 @@ describe('teuerungsrechner page', () => {
         page.berechnen$.emit();
 
         // Assert
-        expect(spy).not.toHaveBeenCalledWith(TeuerungsrechnerActions.berechne(null));
+        expect(spy).not.toHaveBeenCalledWith(TeuerungsrechnerActions.applyBerechne(null));
     });
 
     it('should update resultat model when calculated', () => {

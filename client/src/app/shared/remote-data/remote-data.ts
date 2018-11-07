@@ -24,7 +24,7 @@ export const mapError = <E, F, A>(f: ((error: E) => F)) => (remoteData: RemoteDa
     error: remoteData.error.map(f),
 });
 
-export interface FidAPIErrorResponse {
+export interface BfsAPIErrorResponse {
     status: number;
     statusText: string;
     error: any;
@@ -33,7 +33,7 @@ export interface FidAPIErrorResponse {
 export const RemoteDataError = unionize(
     {
         JavaScriptError: ofType<{ error: Error }>(),
-        APIErrorResponse: ofType<{ apiErrorResponse: FidAPIErrorResponse }>(),
+        APIErrorResponse: ofType<{ apiErrorResponse: BfsAPIErrorResponse }>(),
         PayloadDecodeError: ofType<{ validationErrors: ValidationError[] }>(),
         DecodeError: ofType<{ decodeError: DecodeTypes.JsonDecodeError }>(),
     },
@@ -42,13 +42,4 @@ export const RemoteDataError = unionize(
 );
 export type RemoteDataError = typeof RemoteDataError._Union;
 
-export type FidRemoteData<A> = RemoteData<RemoteDataError, A>;
-
-// export type FidRemoteDataStamped<S, A> = { stamp: S; remoteData: FidRemoteData<A> };
-// export const fidRemoteDataStamped = <S, A>(stamp: S) => (remoteData: FidRemoteData<A>) => ({
-//     stamp,
-//     remoteData,
-// });
-// export type FidRemoteDataStampedArray<S, A> = FidRemoteDataStamped<S, A>[];
-// export const updateOrAppendStamped = <S, A>(as: FidRemoteDataStampedArray<S, A>, a: FidRemoteDataStamped<S, A>) =>
-//     updateOrAppend(as, a, b => b.stamp === a.stamp);
+export type BfsRemoteData<A> = RemoteData<RemoteDataError, A>;
