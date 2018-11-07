@@ -1,6 +1,6 @@
 import { reduxBuilder } from '@shared/redux-builder';
 import { teuerungsrechnerActionsRecord, TeuerungsrechnerActions } from './actions';
-import { TeuerungsrechnerStore } from './reducer';
+import { TeuerungsrechnerStore, Parameters } from './reducer';
 import { initial, loading, success, RemoteDataError, failure } from '@shared/remote-data';
 import * as option from 'fp-ts/lib/Option';
 import { TeuerungsrechnerdatenDto } from '@teuerungsrechner/contracts';
@@ -14,24 +14,34 @@ const initialState: TeuerungsrechnerStore = {
         startdatum: option.none,
         zieldatum: option.none,
         betrag: option.none,
-        indexbasis: option.none
-    }
+        indexbasis: option.none,
+    },
 };
+
+function canBerechnen(parameters: Parameters) {
+    return Object.keys(parameters).every((k: keyof typeof parameters) => {
+        return !!(parameters[k] as option.Option<any>).getOrElse('')
+    });
+}
 
 const built = reduxBuilder<TeuerungsrechnerStore>()
     .declareInitialState(initialState)
     .declareActions(teuerungsrechnerActionsRecord)
     .declareReducer(state => ({
         applyDatenLaden: payload => ({ ...state, datenLaden: payload }),
-        applyBerechnungsParameterChanged: payload => ({
-            ...state,
-            parameters: {
+        applyBerechnungsParameterChanged: payload => {
+            const parameters: Parameters = {
                 startdatum: option.fromNullable(payload.startdatum),
                 zieldatum: option.fromNullable(payload.zieldatum),
                 betrag: option.fromNullable(payload.betrag),
-                indexbasis: option.fromNullable(payload.indexbasis)
-            }
-        }),
+                indexbasis: option.fromNullable(payload.indexbasis),
+            };
+            return {
+                ...state,
+                parameters,
+                canBerechnen: canBerechnen(parameters),
+            };
+        },
     }));
 
 export function teuerungsrechnerReducer(state: any, action: any) {
@@ -44,8 +54,9 @@ export function teuerungsrechnerReducer(state: any, action: any) {
 // -- loading | OK
 // -- data | OK
 // -- error | OK
-// Parameter updates => set canBerechnen
-// Berechnen when all parameters are set
+// Parameter updates => set canBerechnen when all parameters are valid | OK
+// Parameter updates => do not set canBerechnen if some parameter is invalid | OK
+// Berechnen when can berechnen
 describe('teuerungsrechner reducer tests', () => {
     describe('on load daten - loading', () => {
         const ladenLoadingAction = TeuerungsrechnerActions.applyDatenLaden(loading);
@@ -101,34 +112,74 @@ describe('teuerungsrechner reducer tests', () => {
     });
 
     describe('on set parameters', () => {
-
-        const startdatumParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({ startdatum: 'Januar 2018' });
-        const zieldatumParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({ zieldatum: 'Januar 2018' });
-        const betragParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({ betrag: 70000.00 });
-        const indexbasisParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({ indexbasis: 'Dezember 2015' })
+        const startdatumParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+            startdatum: 'Januar 2018',
+        });
+        const zieldatumParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+            zieldatum: 'Januar 2018',
+        });
+        const betragParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+            betrag: 70000.0,
+        });
+        const indexbasisParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+            indexbasis: 'Dezember 2015',
+        });
 
         it('it should set startdatum parameter', () => {
-            expect(teuerungsrechnerReducer(undefined, startdatumParameterChangedAction)
-                .parameters.startdatum).toEqual(option.some('Januar 2018'));
+            expect(teuerungsrechnerReducer(undefined, startdatumParameterChangedAction).parameters.startdatum).toEqual(
+                option.some('Januar 2018')
+            );
         });
 
         it('it should set zieldatum parameter', () => {
-            expect(teuerungsrechnerReducer(undefined, zieldatumParameterChangedAction)
-                .parameters.zieldatum).toEqual(option.some('Januar 2018'));
+            expect(teuerungsrechnerReducer(undefined, zieldatumParameterChangedAction).parameters.zieldatum).toEqual(
+                option.some('Januar 2018')
+            );
         });
 
         it('it should set betrag parameter', () => {
-            expect(teuerungsrechnerReducer(undefined, betragParameterChangedAction)
-                .parameters.betrag).toEqual(option.some(70000.00));
+            expect(teuerungsrechnerReducer(undefined, betragParameterChangedAction).parameters.betrag).toEqual(
+                option.some(70000.0)
+            );
         });
 
         it('it should set indexbasis parameter', () => {
-            expect(teuerungsrechnerReducer(undefined, indexbasisParameterChangedAction)
-                .parameters.indexbasis).toEqual(option.some('Dezember 2015'));
+            expect(teuerungsrechnerReducer(undefined, indexbasisParameterChangedAction).parameters.indexbasis).toEqual(
+                option.some('Dezember 2015')
+            );
         });
 
         it('it should set the canBerechnen when all required parameters set', () => {
+            const setAllParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+                betrag: 70000.0,
+                startdatum: 'Januar 2017',
+                zieldatum: 'Januar 2018',
+                indexbasis: 'Dezember 2015',
+            });
 
+            expect(teuerungsrechnerReducer(undefined, setAllParameterChangedAction).canBerechnen).toEqual(true);
+        });
+
+        it('it should set the canBerechnen when some parameters are not set', () => {
+            const setAllParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+                betrag: 70000.0,
+                startdatum: null,
+                zieldatum: 'Januar 2018',
+                indexbasis: 'Dezember 2015',
+            });
+
+            expect(teuerungsrechnerReducer(undefined, setAllParameterChangedAction).canBerechnen).toEqual(false);
+        });
+
+        it('it should set the canBerechnen when some parameters are empty string', () => {
+            const setAllParameterChangedAction = TeuerungsrechnerActions.applyBerechnungsParameterChanged({
+                betrag: 70000.0,
+                startdatum: '',
+                zieldatum: 'Januar 2018',
+                indexbasis: 'Dezember 2015',
+            });
+
+            expect(teuerungsrechnerReducer(undefined, setAllParameterChangedAction).canBerechnen).toEqual(false);
         });
     });
 });
