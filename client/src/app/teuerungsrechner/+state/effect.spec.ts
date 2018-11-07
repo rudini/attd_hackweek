@@ -11,8 +11,9 @@ import * as t from 'io-ts';
 import { makeValidatedHttpGetCall } from '@shared/service-helpers';
 import { makeRemoteDataCall } from '@shared/effects-helpers';
 import { cold } from 'jest-marbles';
-import { loading, success, failure, BfsAPIErrorResponse, RemoteDataError } from '@shared/remote-data';
+import { loading, success, failure, RemoteDataError } from '@shared/remote-data';
 import { GlobalAction } from '@shared/global-action';
+import { JsonDecodeError } from 'decode-ts';
 
 export const TimeDimensionDtoRT = t.type({
     id: t.number,
@@ -48,9 +49,8 @@ export interface TeuerungsrechnerdatenDto extends t.TypeOf<typeof Teuerungsrechn
 // load data from server { loading: xxx } | OK
 // validate response { data: Option<xxx> } | OK
 // dispatch action to store { payload: xxx } | OK
-// -- server error handling (conneciton, 404, 503..) { error: ServerError }
-// -- invalid data { error: ValidationError }
-// -- dispatch error { payload: error }
+// -- server error handling (conneciton, 404, 503..) { error: ServerError } | OK
+// -- invalid data { error: ValidationError } | OK
 describe('teuerungsrechner effects tests', () => {
     let httpClientMock: HttpClient;
     let effect: TeuerungsrechnerEffect;
@@ -128,6 +128,29 @@ describe('teuerungsrechner effects tests', () => {
         // Assert
         expect(effect.onLoad$).toBeObservable(expected$);
     });
+
+    it('should dispatch validation error when data is invalid', () => {
+        // Arrange
+        const invalidData: any = {
+            timeDimension: { id: 1, month: "1", year: 2016, name: 'Januar 2016' },
+            indexDimension: { id: 1, month: 5, year: 1914, name: 'Mai 1914' },
+            facts: { timeDim: 1, indexDim: 1, indexValue: 1017.1 },
+        };
+
+        const expected$ = cold('a(bc)', {
+            a: TeuerungsrechnerActions.applyDatenLaden(loading),
+            b: TeuerungsrechnerActions.applyDatenLaden(failure(RemoteDataError.DecodeError(<any>validationErrorMessage))),
+            c: GlobalAction.globalRemoteDataError(RemoteDataError.DecodeError(<any>validationErrorMessage))
+        });
+        url = 'URL';
+        httpClientMock.get = jest.fn(() => cold('-a', { a: JSON.stringify(invalidData) }));
+
+        // Act
+        actions = cold('a', { a: TeuerungsrechnerActions.datenLaden(null) });
+
+        // Assert
+        expect(effect.onLoad$).toBeObservable(expected$);
+    }) 
 });
 
 @Injectable()
@@ -151,3 +174,118 @@ export const datenLaden = (http: HttpClient, appConfigService: AppConfigService)
         TeuerungsrechnerdatenDtoRT
     );
 };
+
+const validationErrorMessage: JsonDecodeError = JSON.parse(`{
+    "decodeError": {
+      "validationErrors": [
+        {
+          "value": "1",
+          "context": [
+            {
+              "key": "",
+              "type": {
+                "name": "{ timeDimension: { id: number, month: number, year: number, name: string }, indexDimension: { id: number, month: number, year: number, name: string }, facts: { timeDim: number, indexDim: number, indexValue: number } }",
+                "props": {
+                  "timeDimension": {
+                    "name": "{ id: number, month: number, year: number, name: string }",
+                    "props": {
+                      "id": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "month": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "year": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "name": {
+                        "name": "string",
+                        "_tag": "StringType"
+                      }
+                    },
+                    "_tag": "InterfaceType"
+                  },
+                  "indexDimension": {
+                    "name": "{ id: number, month: number, year: number, name: string }",
+                    "props": {
+                      "id": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "month": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "year": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "name": {
+                        "name": "string",
+                        "_tag": "StringType"
+                      }
+                    },
+                    "_tag": "InterfaceType"
+                  },
+                  "facts": {
+                    "name": "{ timeDim: number, indexDim: number, indexValue: number }",
+                    "props": {
+                      "timeDim": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "indexDim": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      },
+                      "indexValue": {
+                        "name": "number",
+                        "_tag": "NumberType"
+                      }
+                    },
+                    "_tag": "InterfaceType"
+                  }
+                },
+                "_tag": "InterfaceType"
+              }
+            },
+            {
+              "key": "timeDimension",
+              "type": {
+                "name": "{ id: number, month: number, year: number, name: string }",
+                "props": {
+                  "id": {
+                    "name": "number",
+                    "_tag": "NumberType"
+                  },
+                  "month": {
+                    "name": "number",
+                    "_tag": "NumberType"
+                  },
+                  "year": {
+                    "name": "number",
+                    "_tag": "NumberType"
+                  },
+                  "name": {
+                    "name": "string",
+                    "_tag": "StringType"
+                  }
+                },
+                "_tag": "InterfaceType"
+              }
+            },
+            {
+              "key": "month",
+              "type": {
+                "name": "number",
+                "_tag": "NumberType"
+              }
+            }
+          ]
+        }
+      ],
+      "tag": "ValidationErrors"
+    }}`);
