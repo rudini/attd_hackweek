@@ -2,11 +2,18 @@ import { ResultModel } from "../models";
 import { createFeatureSelector, createSelector } from "@ngrx/store";
 import { BfsRemoteData } from "@shared/remote-data";
 import { TeuerungsrechnerdatenDto } from "@teuerungsrechner/contracts";
+import { Option } from "fp-ts/lib/Option";
 
 export type TeuerungsrechnerStore = {
     canBerechnen: boolean;
     result: ResultModel;
     datenLaden: BfsRemoteData<TeuerungsrechnerdatenDto>;
+    parameters: { 
+        startdatum: Option<string>, 
+        zieldatum: Option<string>, 
+        betrag: Option<number>,
+        indexbasis: Option<string>
+    }
 };
 
 export const getTeuerungsrechnerState = createFeatureSelector<TeuerungsrechnerStore>('teuerungsrechner');
