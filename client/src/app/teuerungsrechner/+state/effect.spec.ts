@@ -1,14 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Actions, Effect } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { ReplaySubject, Observable } from 'rxjs';
 import { TeuerungsrechnerActions } from './actions';
 import { AppConfigService } from '@shared/services/environment-service';
-import { mergeMap, filter } from 'rxjs/operators';
-import { makeValidatedHttpGetCall } from '@shared/service-helpers';
-import { makeRemoteDataCall } from '@shared/effects-helpers';
 import { cold } from 'jest-marbles';
 import { loading, success, failure, RemoteDataError } from '@shared/remote-data';
 import { GlobalAction } from '@shared/global-action';
