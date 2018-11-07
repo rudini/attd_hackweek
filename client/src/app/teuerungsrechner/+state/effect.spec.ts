@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -8,11 +7,11 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { TeuerungsrechnerActions } from './actions';
 import { AppConfigService } from '@shared/services/environment-service';
 import { mergeMap, filter } from 'rxjs/operators';
-import { cold } from 'jest-marbles';
 import * as t from 'io-ts';
-import { success, loading } from '@shared/remote-data';
 import { makeValidatedHttpGetCall } from '@shared/service-helpers';
 import { makeRemoteDataCall } from '@shared/effects-helpers';
+import { cold } from 'jest-marbles';
+import { loading, success } from '@shared/remote-data';
 
 export const TimeDimensionDtoRT = t.type({
     id: t.number,
@@ -53,7 +52,7 @@ export interface TeuerungsrechnerdatenDto extends t.TypeOf<typeof Teuerungsrechn
 // -- invalid data { error: ValidationError }
 // -- dispatch error { payload: error }
 describe('teuerungsrechner effects tests', () => {
-    let httpMock: HttpTestingController;
+    let httpClientMock: HttpClient;
     let effect: TeuerungsrechnerEffect;
     let actions: Observable<any>;
     let url: string;
@@ -64,8 +63,8 @@ describe('teuerungsrechner effects tests', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
             providers: [
+                { provide: HttpClient, useValue: { get: jest.fn() }}, 
                 TeuerungsrechnerEffect,
                 { provide: AppConfigService, useFactory: mockAppConfigService },
                 provideMockActions(() => {
@@ -73,12 +72,8 @@ describe('teuerungsrechner effects tests', () => {
                 }),
             ],
         });
-        httpMock = TestBed.get(HttpTestingController);
+        httpClientMock = TestBed.get(HttpClient);
         effect = TestBed.get(TeuerungsrechnerEffect);
-    });
-
-    afterEach(() => {
-        httpMock.verify();
     });
 
     it('should load data from server', () => {
@@ -86,13 +81,13 @@ describe('teuerungsrechner effects tests', () => {
         url = 'URL';
         actions = new ReplaySubject(1);
         effect.onLoad$.subscribe();
+        const spy = jest.spyOn(httpClientMock, 'get');
 
         // Act
         (<ReplaySubject<any>>actions).next(TeuerungsrechnerActions.datenLaden(null));
 
         // Assert
-        const req = httpMock.expectOne(url);
-        req.flush('{}');
+        expect(spy).toHaveBeenCalledWith(url, expect.anything());
     });
 
     it('should return some data after loading valid data from server', () => {
@@ -104,15 +99,12 @@ describe('teuerungsrechner effects tests', () => {
          };
         const expected$ = cold('ab', { a: TeuerungsrechnerActions.applyDatenLaden(loading),  b: TeuerungsrechnerActions.applyDatenLaden(success(data)) });
         url = 'URL';
+        httpClientMock.get = jest.fn(() => cold('-a', { a: JSON.stringify(data)}));
 
         // Act
         actions = cold('a', { a: TeuerungsrechnerActions.datenLaden(null) });
 
         // Assert
-        cold('-a').subscribe(() => {
-            const req = httpMock.expectOne(url);
-            req.flush(JSON.stringify(data));
-        });
         expect(effect.onLoad$).toBeObservable(expected$);
     });
 });
@@ -124,14 +116,11 @@ export class TeuerungsrechnerEffect {
     @Effect()
     onLoad$ = this.actions$.pipe(
         filter(TeuerungsrechnerActions.is.datenLaden),
-        mergeMap(x => makeRemoteDataCall(
-            datenLaden(this.http, this.appConfigService),
-            TeuerungsrechnerActions.applyDatenLaden)),
+        mergeMap(() => makeRemoteDataCall(datenLaden(this.http, this.appConfigService), TeuerungsrechnerActions.applyDatenLaden)),
     );
 }
 
 export const datenLaden = (http: HttpClient, appConfigService: AppConfigService) => {
     console.log('requesting');
     return makeValidatedHttpGetCall(http, appConfigService.buildApiUrl('api/teuerungsrechnerdaten'), TeuerungsrechnerdatenDtoRT)
-    // return http.get<string>(appConfigService.buildApiUrl('api/teuerungsrechnerdaten'));
 };
