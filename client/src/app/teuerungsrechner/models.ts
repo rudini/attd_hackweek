@@ -6,4 +6,7 @@ export interface BerechnungsParameterModel {
 }
 
 export type ResultModel = {
+    zielbetrag: number,
+    veraenderung: number,
+    indexe: {date: string, value: number}[]
 };

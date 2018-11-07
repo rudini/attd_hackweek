@@ -21,9 +21,9 @@ export const FactsDtoRT = t.type({
 });
 
 export const TeuerungsrechnerdatenDtoRT = t.type({
-    timeDimension: TimeDimensionDtoRT,
-    indexDimension: IndexDimensionDtoRT,
-    facts: FactsDtoRT,
+    timeDimension: t.array(TimeDimensionDtoRT),
+    indexDimension: t.array(IndexDimensionDtoRT),
+    facts: t.array(FactsDtoRT),
 });
 
 export interface TimeDimensionDto extends t.TypeOf<typeof TimeDimensionDtoRT> {}
