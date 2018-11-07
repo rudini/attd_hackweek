@@ -7,44 +7,14 @@ import { ReplaySubject, Observable } from 'rxjs';
 import { TeuerungsrechnerActions } from './actions';
 import { AppConfigService } from '@shared/services/environment-service';
 import { mergeMap, filter } from 'rxjs/operators';
-import * as t from 'io-ts';
 import { makeValidatedHttpGetCall } from '@shared/service-helpers';
 import { makeRemoteDataCall } from '@shared/effects-helpers';
 import { cold } from 'jest-marbles';
 import { loading, success, failure, RemoteDataError } from '@shared/remote-data';
 import { GlobalAction } from '@shared/global-action';
 import { JsonDecodeError } from 'decode-ts';
-
-export const TimeDimensionDtoRT = t.type({
-    id: t.number,
-    month: t.number,
-    year: t.number,
-    name: t.string,
-});
-
-export const IndexDimensionDtoRT = t.type({
-    id: t.number,
-    month: t.number,
-    year: t.number,
-    name: t.string,
-});
-
-export const FactsDtoRT = t.type({
-    timeDim: t.number,
-    indexDim: t.number,
-    indexValue: t.number,
-});
-
-export const TeuerungsrechnerdatenDtoRT = t.type({
-    timeDimension: TimeDimensionDtoRT,
-    indexDimension: IndexDimensionDtoRT,
-    facts: FactsDtoRT,
-});
-
-export interface TimeDimensionDto extends t.TypeOf<typeof TimeDimensionDtoRT> {}
-export interface IndexDimensionDto extends t.TypeOf<typeof IndexDimensionDtoRT> {}
-export interface FactsDto extends t.TypeOf<typeof FactsDtoRT> {}
-export interface TeuerungsrechnerdatenDto extends t.TypeOf<typeof TeuerungsrechnerdatenDtoRT> {}
+import { TeuerungsrechnerdatenDto } from '@teuerungsrechner/contracts';
+import { TeuerungsrechnerEffect } from './effect';
 
 // load data from server { loading: xxx } | OK
 // validate response { data: Option<xxx> } | OK
@@ -152,28 +122,6 @@ describe('teuerungsrechner effects tests', () => {
         expect(effect.onLoad$).toBeObservable(expected$);
     }) 
 });
-
-@Injectable()
-export class TeuerungsrechnerEffect {
-    constructor(private actions$: Actions, private http: HttpClient, private appConfigService: AppConfigService) {}
-
-    @Effect()
-    onLoad$ = this.actions$.pipe(
-        filter(TeuerungsrechnerActions.is.datenLaden),
-        mergeMap(() =>
-            makeRemoteDataCall(datenLaden(this.http, this.appConfigService), TeuerungsrechnerActions.applyDatenLaden)
-        )
-    );
-}
-
-export const datenLaden = (http: HttpClient, appConfigService: AppConfigService) => {
-    console.log('requesting');
-    return makeValidatedHttpGetCall(
-        http,
-        appConfigService.buildApiUrl('api/teuerungsrechnerdaten'),
-        TeuerungsrechnerdatenDtoRT
-    );
-};
 
 const validationErrorMessage: JsonDecodeError = JSON.parse(`{
     "decodeError": {
