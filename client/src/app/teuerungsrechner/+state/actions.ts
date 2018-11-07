@@ -1,8 +1,8 @@
 import { BerechnungsParameterModel } from "../models";
 import { ofType } from "@shared/redux-builder";
 import { unionizeActions } from "@shared/redux-builder/unionize-actions";
-import { TeuerungsrechnerdatenDto } from "./effect.spec";
 import { BfsRemoteData } from "@shared/remote-data";
+import { TeuerungsrechnerdatenDto } from "@teuerungsrechner/contracts";
 
 export const teuerungsrechnerActionsRecord = {
     datenLaden: ofType<null>(),
@@ -12,3 +12,4 @@ export const teuerungsrechnerActionsRecord = {
 };
 
 export const TeuerungsrechnerActions = unionizeActions(teuerungsrechnerActionsRecord);
+export type TeuerungsrechnerActions = typeof TeuerungsrechnerActions._Union;

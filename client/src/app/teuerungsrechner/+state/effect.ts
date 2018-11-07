@@ -23,7 +23,6 @@ export class TeuerungsrechnerEffect {
 }
 
 export const datenLaden = (http: HttpClient, appConfigService: AppConfigService) => {
-    console.log('requesting');
     return makeValidatedHttpGetCall(
         http,
         appConfigService.buildApiUrl('api/teuerungsrechnerdaten'),
