@@ -1,8 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { NgxFpTsModule } from 'ngx-fp-ts';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import localeDECH from '@angular/common/locales/de-CH';
+import { registerLocaleData } from "@angular/common";
+registerLocaleData(localeDECH);
 
 @NgModule({
   declarations: [
@@ -10,7 +13,8 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgxFpTsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
