@@ -6,7 +6,17 @@ import { AppComponent } from './app.component';
 import localeDECH from '@angular/common/locales/de-CH';
 import { registerLocaleData } from "@angular/common";
 import { ReactiveFormsModule } from '@angular/forms';
+import { TeuerungsrechnerModule } from '@teuerungsrechner/teuerungsrechner.module';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreModule, MetaReducer } from '@ngrx/store';
+import { environment } from 'src/environments/environment';
+import {storeLogger } from 'ngrx-store-logger';
 registerLocaleData(localeDECH);
+
+export const metaReducers: MetaReducer<any>[] = [
+  ...(environment.ngrxStoreLoggerEnabled ? [storeLogger()] : []),
+  ...(environment.ngrxStoreFreezeEnabled ? [] : []),
+];
 
 @NgModule({
   declarations: [
@@ -16,7 +26,10 @@ registerLocaleData(localeDECH);
     BrowserModule,
     AppRoutingModule,
     NgxFpTsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    EffectsModule.forRoot([]),
+    StoreModule.forRoot({}, {metaReducers}),
+    TeuerungsrechnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

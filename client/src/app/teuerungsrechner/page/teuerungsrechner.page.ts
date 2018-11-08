@@ -9,7 +9,11 @@ import { ContainerComponent } from "@shared/reactive-component";
 import { Option } from "fp-ts/lib/Option";
 
 @Component({
-    template: '<div></div>'
+    template: `<app-teuerungsrechner
+        [berechnungsdaten]="result$ | async"
+        [canBerechnen]="canBerechnen$ | async"
+        (onBerechnenClicked)="berechnen$.emit($event)"
+        (parameterChanged)="parameterChanged$.emit($event)"></app-teuerungsrechner>`
 })
 export class TeuerungsrechnerPageComponent extends ContainerComponent {
     parameterChanged$ = new EventEmitter<Partial<BerechnungsParameterModel>>();

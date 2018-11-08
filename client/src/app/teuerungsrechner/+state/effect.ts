@@ -26,6 +26,7 @@ export const datenLaden = (http: HttpClient, appConfigService: AppConfigService)
     return makeValidatedHttpGetCall(
         http,
         appConfigService.buildApiUrl('api/teuerungsrechnerdaten'),
-        TeuerungsrechnerdatenDtoRT
+        TeuerungsrechnerdatenDtoRT,
+        false
     );
 };

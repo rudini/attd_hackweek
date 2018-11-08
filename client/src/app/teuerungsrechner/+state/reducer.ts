@@ -24,7 +24,7 @@ export type TeuerungsrechnerStore = {
 
 const initialState: TeuerungsrechnerStore = {
     datenLaden: initial,
-    result: <any>{},
+    result: option.none,
     canBerechnen: false,
     parameters: {
         startdatum: option.none,

@@ -3,7 +3,7 @@ import * as either from 'fp-ts/lib/Either';
 import { concat, merge, Observable, of } from 'rxjs';
 import { mergeMap, shareReplay, switchMap } from 'rxjs/operators';
 import { GlobalAction } from '../global-action';
-import { failure, FidRemoteData, loading, RemoteDataError, success } from '../remote-data';
+import { failure, BfsRemoteData, loading, RemoteDataError, success } from '../remote-data';
 import { fromFilteredLeft, fromFilteredRight } from '../rx-helpers';
 
 import Either = either.Either;
@@ -28,7 +28,7 @@ const getRemoteDataCallOptionsWithDefaults = (options: RemoteDataCallOptions) =>
 
 export function makeRemoteDataCall<T>(
     serviceCall: Observable<Either<RemoteDataError, T>>,
-    actionCreator: (v: FidRemoteData<T>) => Action,
+    actionCreator: (v: BfsRemoteData<T>) => Action,
     options: RemoteDataCallOptions = {},
 ) {
     const {
@@ -41,7 +41,7 @@ export function makeRemoteDataCall<T>(
         [...preLoadingActions, actionCreator(loading), ...postLoadingActions],
         serviceCall.pipe(
             mergeMap(x => [
-                actionCreator(x.fold<FidRemoteData<T>>(failure, success)),
+                actionCreator(x.fold<BfsRemoteData<T>>(failure, success)),
                 ...x.fold(remoteDataErrorGlobalHandler, () => []),
             ]),
         ),
@@ -50,7 +50,7 @@ export function makeRemoteDataCall<T>(
 
 export function makeRemoteDataCallTransform<T, U>(
     serviceCall: Observable<Either<RemoteDataError, T>>,
-    project: (v: FidRemoteData<T>) => U,
+    project: (v: BfsRemoteData<T>) => U,
     actionCreator: (v: U) => Action,
     options: RemoteDataCallOptions = {},
 ) {
@@ -64,7 +64,7 @@ export function makeRemoteDataCallTransform<T, U>(
         [...preLoadingActions, actionCreator(project(loading)), ...postLoadingActions],
         serviceCall.pipe(
             mergeMap(x => [
-                actionCreator(project(x.fold<FidRemoteData<T>>(failure, success))),
+                actionCreator(project(x.fold<BfsRemoteData<T>>(failure, success))),
                 ...x.fold(remoteDataErrorGlobalHandler, () => []),
             ]),
         ),
@@ -73,7 +73,7 @@ export function makeRemoteDataCallTransform<T, U>(
 
 export function makeRemoteDataCallChain<T>(
     serviceCall: Observable<Either<RemoteDataError, T>>,
-    actionCreator: (v: FidRemoteData<T>) => Action,
+    actionCreator: (v: BfsRemoteData<T>) => Action,
     options: RemoteDataCallOptions = {},
 ) {
     const {
@@ -90,7 +90,7 @@ export function makeRemoteDataCallChain<T>(
         [...preLoadingActions, actionCreator(loading), ...postLoadingActions],
         serviceCall$.pipe(
             mergeMap(x => [
-                actionCreator(x.fold<FidRemoteData<T>>(failure, success)),
+                actionCreator(x.fold<BfsRemoteData<T>>(failure, success)),
                 ...x.fold(remoteDataErrorGlobalHandler, () => []),
             ]),
         ),
@@ -105,7 +105,7 @@ export function makeRemoteDataCallChain<T>(
 
 export function makeRemoteDataCallChain2<T>(
     serviceCall: Observable<Either<RemoteDataError, T>>,
-    actionCreator: (v: FidRemoteData<T>) => Action,
+    actionCreator: (v: BfsRemoteData<T>) => Action,
     onData$: Observable<Action>,
     options: RemoteDataCallOptions = {},
 ) {
@@ -123,7 +123,7 @@ export function makeRemoteDataCallChain2<T>(
         [...preLoadingActions, actionCreator(loading), ...postLoadingActions],
         serviceCall$.pipe(
             mergeMap(x => [
-                actionCreator(x.fold<FidRemoteData<T>>(failure, success)),
+                actionCreator(x.fold<BfsRemoteData<T>>(failure, success)),
                 ...x.fold(remoteDataErrorGlobalHandler, () => []),
             ]),
         ),
@@ -140,7 +140,7 @@ export function makeRemoteDataCallChain2<T>(
 
 export function makeRemoteDataCallTransformChain<T, U>(
     serviceCall: Observable<Either<RemoteDataError, T>>,
-    project: (v: FidRemoteData<T>) => U,
+    project: (v: BfsRemoteData<T>) => U,
     actionCreator: (v: U) => Action,
     options: RemoteDataCallOptions = {},
 ) {
@@ -158,7 +158,7 @@ export function makeRemoteDataCallTransformChain<T, U>(
         [...preLoadingActions, actionCreator(project(loading)), ...postLoadingActions],
         serviceCall$.pipe(
             mergeMap(x => [
-                actionCreator(project(x.fold<FidRemoteData<T>>(failure, success))),
+                actionCreator(project(x.fold<BfsRemoteData<T>>(failure, success))),
                 ...x.fold(remoteDataErrorGlobalHandler, () => []),
             ]),
         ),
