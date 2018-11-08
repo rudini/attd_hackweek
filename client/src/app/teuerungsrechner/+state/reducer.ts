@@ -17,7 +17,7 @@ export type Parameters = {
 
 export type TeuerungsrechnerStore = {
     canBerechnen: boolean;
-    result: ResultModel;
+    result: Option<ResultModel>;
     datenLaden: BfsRemoteData<TeuerungsrechnerdatenDto>;
     parameters: Parameters;
 };
@@ -41,7 +41,7 @@ function canBerechnen(parameters: Parameters) {
     });
 }
 
-function berechneResultat(state: TeuerungsrechnerStore): ResultModel {
+function berechneResultat(state: TeuerungsrechnerStore): Option<ResultModel> {
 
     const indexMap = state.datenLaden.data.map(x => x.timeDimension.reduce((acc, curr) => ({
         ...acc, [curr.id]: curr.name
@@ -84,13 +84,14 @@ function berechneResultat(state: TeuerungsrechnerStore): ResultModel {
     const indexe = allIndexes.map(x => x.map(i => ({
         value: i.indexValue,
         date: indexMap.map(m => m[i.timeDim]).toNullable()
-    })))
+    })));
 
-    return {
-        veraenderung: veraenderung.map(v => +v.toFixed(1)),
-        zielbetrag: zielbetrag.map(z => Math.floor(z)),
-        indexe
-    }
+    const hasAllValues = veraenderung.chain(v => zielbetrag).chain(z => indexe).isSome();
+    return !hasAllValues ? option.none : option.some({
+        veraenderung: veraenderung.map(v => +v.toFixed(1)).toNullable(),
+        zielbetrag: zielbetrag.map(z => Math.floor(z)).toNullable(),
+        indexe: indexe.toNullable()
+    });
 }
 
 const built = reduxBuilder<TeuerungsrechnerStore>()

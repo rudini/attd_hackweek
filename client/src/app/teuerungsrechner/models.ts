@@ -8,7 +8,7 @@ export interface BerechnungsParameterModel {
 }
 
 export type ResultModel = {
-    zielbetrag: Option<number>,
-    veraenderung: Option<number>,
-    indexe: Option<{date: string, value: number}[]>
+    zielbetrag: number,
+    veraenderung: number,
+    indexe: {date: string, value: number}[]
 };

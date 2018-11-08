@@ -138,7 +138,7 @@ describe('teuerungsrechner reducer tests', () => {
         });
     });
 
-    describe('on berechnen', () => {
+    describe('on berechnen', () => { 
         it('it should set berechungsresultat when canBerechnen is true', () => {
             const applyBerechnen = TeuerungsrechnerActions.applyBerechne(null);
             const allParametersSetPrecondition: TeuerungsrechnerStore = {
@@ -152,11 +152,11 @@ describe('teuerungsrechner reducer tests', () => {
                     indexbasis: option.some('Dezember 2015'),
                 },
             };
-            expect(teuerungsrechnerReducer(allParametersSetPrecondition, applyBerechnen).result).toEqual({
-                zielbetrag: option.some(70281.00),
-                veraenderung: option.some(0.4),
-                indexe: option.some([{ date: 'Januar 2016', value: 99.6 }, { date: 'Februar 2016', value: 99.8 }, { date: 'März 2016', value: 100.1 }, { date: 'April 2016', value: 100.4 }, { date: 'Mai 2016', value: 100.6 }, { date: 'Juni 2016', value: 100.7 }, { date: 'Juli 2016', value: 100.3 }, { date: 'August 2016', value: 100.2 }, { date: 'September 2016', value: 100.2 }, { date: 'Oktober 2016', value: 100.3 }, { date: 'November 2016', value: 100.1 }, { date: 'Dezember 2016', value: 100.0 }, { date: 'Januar 2017', value: 100.0 }])
-            })
+            expect(teuerungsrechnerReducer(allParametersSetPrecondition, applyBerechnen).result).toEqual(option.some({
+                zielbetrag: 70281.00,
+                veraenderung: 0.4,
+                indexe: [{ date: 'Januar 2016', value: 99.6 }, { date: 'Februar 2016', value: 99.8 }, { date: 'März 2016', value: 100.1 }, { date: 'April 2016', value: 100.4 }, { date: 'Mai 2016', value: 100.6 }, { date: 'Juni 2016', value: 100.7 }, { date: 'Juli 2016', value: 100.3 }, { date: 'August 2016', value: 100.2 }, { date: 'September 2016', value: 100.2 }, { date: 'Oktober 2016', value: 100.3 }, { date: 'November 2016', value: 100.1 }, { date: 'Dezember 2016', value: 100.0 }, { date: 'Januar 2017', value: 100.0 }]
+            }))
         });
     });
 });
