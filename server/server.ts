@@ -1,12 +1,10 @@
 import * as express from 'express';
-import { Express, Response, Request } from 'express';
+import { registerRoutes } from './routes';
 
-const app: Express = express();
+const app = express();
 
-app.get('/', function (_: Request, res: Response) {
-  res.send('Hello World!');
-});
+registerRoutes(app);
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+app.listen(3000, function() {
+    console.log('Example app listening on port 3000!');
 });
