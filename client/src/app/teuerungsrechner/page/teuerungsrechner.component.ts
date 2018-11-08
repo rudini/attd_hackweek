@@ -15,7 +15,20 @@ import * as option from 'fp-ts/lib/Option';
         <label for="indexbasis">Indexbasis: </label><input id="indexbasis" formControlName="indexbasis" data-e2e="indexbasis" type="text">
     </form>
     <ng-container *ifSome="berechnungsdaten; let berechnungsdaten">
-    <p data-e2e="zielbetrag">{{berechnungsdaten.zielbetrag | number:'1.2-2'}}</p>
+        <p>Zielbetrag: <span data-e2e="zielbetrag">{{berechnungsdaten.zielbetrag | number:'1.2-2'}}</span></p>
+        <p>Veraenderung: <span data-e2e="veraenderung">{{berechnungsdaten.veraenderung | number:'1.1-1'}}%</span></p>
+        <table data-e2e="indexe">
+            <thead>
+                <tr>
+                    <th data-e2e="index-header" *ngFor="let index of berechnungsdaten.indexe">{{index.date}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-e2e="index-value" *ngFor="let index of berechnungsdaten.indexe">{{index.value | number:'1.1-1'}}</td>
+                </tr>
+            </tbody>
+        </table>
     </ng-container>
     <button data-e2e="berechnen" type="submit" (click)="onBerechnenClicked$.emit()" [disabled]="!canBerechnen">Berechnen</button>
     `,

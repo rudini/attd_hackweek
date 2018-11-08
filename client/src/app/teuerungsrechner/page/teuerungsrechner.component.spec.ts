@@ -38,32 +38,67 @@ describe('teuerungsrechner component spec', () => {
     // when berechnen clicked -> emit berechnen event | OK
     // when parameter changed -> emit parameters event | OK
     describe('on resultat changed', () => {
-        it('it should set input data', () => {
+        const testdata = option.some({
+            zielbetrag: 70281.0,
+            veraenderung: 0.4,
+            indexe: [
+                { date: 'Januar 2016', value: 99.6 },
+                { date: 'Februar 2016', value: 99.8 },
+                { date: 'März 2016', value: 100.1 },
+                { date: 'April 2016', value: 100.4 },
+                { date: 'Mai 2016', value: 100.6 },
+                { date: 'Juni 2016', value: 100.7 },
+                { date: 'Juli 2016', value: 100.3 },
+                { date: 'August 2016', value: 100.2 },
+                { date: 'September 2016', value: 100.2 },
+                { date: 'Oktober 2016', value: 100.3 },
+                { date: 'November 2016', value: 100.1 },
+                { date: 'Dezember 2016', value: 100.0 },
+                { date: 'Januar 2017', value: 100.0 },
+            ],
+        });
+
+        it('it should set zielbetrag', () => {
+            // Arrange
+            testee.berechnungsdaten = testdata;
+
             // Act
-            testee.berechnungsdaten = option.some({
-                zielbetrag: 70281.0,
-                veraenderung: 0.4,
-                indexe: [
-                    { date: 'Januar 2016', value: 99.6 },
-                    { date: 'Februar 2016', value: 99.8 },
-                    { date: 'März 2016', value: 100.1 },
-                    { date: 'April 2016', value: 100.4 },
-                    { date: 'Mai 2016', value: 100.6 },
-                    { date: 'Juni 2016', value: 100.7 },
-                    { date: 'Juli 2016', value: 100.3 },
-                    { date: 'August 2016', value: 100.2 },
-                    { date: 'September 2016', value: 100.2 },
-                    { date: 'Oktober 2016', value: 100.3 },
-                    { date: 'November 2016', value: 100.1 },
-                    { date: 'Dezember 2016', value: 100.0 },
-                    { date: 'Januar 2017', value: 100.0 },
-                ],
-            });
             fixture.detectChanges();
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Assert
             expect(node.querySelector('[data-e2e="zielbetrag"]').innerHTML).toBe('70’281.00');
+        });
+
+        it('it should set veraenderung', () => {
+            // Arrange
+            testee.berechnungsdaten = testdata;
+
+            // Act
+            fixture.detectChanges();
+            const node: HTMLElement = fixture.elementRef.nativeElement;
+
+            // Assert
+            expect(node.querySelector('[data-e2e="veraenderung"]').innerHTML).toBe('0.4%');
+        });
+
+        it('it should set indexe', () => {
+            // Arrange
+            testee.berechnungsdaten = testdata;
+
+            // Act
+            fixture.detectChanges();
+            const node: HTMLElement = fixture.elementRef.nativeElement;
+
+            const getElementsFromTable = (table: HTMLElement, name: string) => {
+                let values = [];
+                table.querySelectorAll(`[data-e2e="${name}"]`).forEach(x => values.push(x.innerHTML));
+                return values;
+            }
+
+            // Assert
+            expect(getElementsFromTable(node.querySelector('[data-e2e="indexe"]'), 'index-header')).toEqual(["Januar 2016", "Februar 2016", "März 2016", "April 2016", "Mai 2016", "Juni 2016", "Juli 2016", "August 2016", "September 2016", "Oktober 2016", "November 2016", "Dezember 2016", "Januar 2017"]);
+            expect(getElementsFromTable(node.querySelector('[data-e2e="indexe"]'), 'index-value')).toEqual(["99.6", "99.8", "100.1", "100.4", "100.6", "100.7", "100.3", "100.2", "100.2", "100.3", "100.1", "100.0", "100.0"]);
         });
     });
 
