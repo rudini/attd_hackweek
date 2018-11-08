@@ -3,7 +3,10 @@ import { teuerungsrechnerActionsRecord, TeuerungsrechnerActions } from './action
 import { TeuerungsrechnerStore, Parameters } from './reducer';
 import { initial, loading, success, RemoteDataError, failure } from '@shared/remote-data';
 import * as option from 'fp-ts/lib/Option';
+import * as array from 'fp-ts/lib/Array';
 import { TeuerungsrechnerdatenDto } from '@teuerungsrechner/contracts';
+import { ResultModel } from '@teuerungsrechner/models';
+   
 
 // reducer impl
 const initialState: TeuerungsrechnerStore = {
@@ -24,8 +27,56 @@ function canBerechnen(parameters: Parameters) {
     });
 }
 
-function berechneResultat(state: TeuerungsrechnerStore) {
-    return state.result;
+function berechneResultat(state: TeuerungsrechnerStore): ResultModel {
+
+    const indexMap = state.datenLaden.data.map(x => x.timeDimension.reduce((acc, curr) => ({
+        ...acc, [curr.id]: curr.name
+    }), {} as {[timeDim: number]: string}))
+
+    const startdatum = state.datenLaden.data
+        .map(x => x.timeDimension
+            .filter(
+                f => state.parameters.startdatum
+                    .map(s => s === f.name).getOrElse(false))).mapNullable(arr => arr[0])
+        .map(i => i.id)
+        .getOrElse(-1);
+
+    const zieldatum = state.datenLaden.data
+        .map(x => x.timeDimension
+            .filter(
+                f => state.parameters.zieldatum
+                    .map(s => s === f.name).getOrElse(false))).mapNullable(arr => arr[0])
+        .map(i => i.id)
+        .getOrElse(-1);
+
+    const indexbasis = state.datenLaden.data
+        .map(x => x.indexDimension.filter(f => state.parameters.indexbasis.map(s => s === f.name).getOrElse(false)))
+        .mapNullable(arr => arr[0])
+        .map(i => i.id)
+        .getOrElse(-1);
+
+    const allIndexes = state.datenLaden.data
+        .map(d => d.facts.filter(x => x.timeDim >= startdatum && x.timeDim <= zieldatum && x.indexDim === indexbasis))
+        .map(v => v.map(x => ({
+            timeDim: x.timeDim,
+            indexValue: x.indexValue
+        })));
+
+    const first = allIndexes.chain(arr => array.head(arr));
+    const last = allIndexes.chain(arr => array.last(arr));
+
+    const veraenderung = last.chain(l => first.map(f => (l.indexValue - f.indexValue)/f.indexValue*100));
+    const zielbetrag = state.parameters.betrag.chain(b => veraenderung.map(v => b * v / 100 + b));
+    const indexe = allIndexes.map(x => x.map(i => ({
+        value: i.indexValue,
+        date: indexMap.map(m => m[i.timeDim]).toNullable()
+    })))
+
+    return {
+        veraenderung: veraenderung.map(v => +v.toFixed(1)),
+        zielbetrag: zielbetrag.map(z => Math.floor(z)),
+        indexe
+    }
 }
 
 const built = reduxBuilder<TeuerungsrechnerStore>()
@@ -55,6 +106,7 @@ export function teuerungsrechnerReducer(state: any, action: any) {
     return built.reducer(state, action);
 }
 // reducer impl end
+
 
 // Initialize data for datastore | OK
 // Daten geladen =>
@@ -194,7 +246,7 @@ describe('teuerungsrechner reducer tests', () => {
         it('it should set berechungsresultat when canBerechnen is true', () => {
             const applyBerechnen = TeuerungsrechnerActions.applyBerechne(null);
             const allParametersSetPrecondition: TeuerungsrechnerStore = {
-                datenLaden: success(berchnungsdaten),
+                datenLaden: success(berechnungsdaten),
                 result: <any>{},
                 canBerechnen: true,
                 parameters: {
@@ -205,16 +257,16 @@ describe('teuerungsrechner reducer tests', () => {
                 },
             };
             expect(teuerungsrechnerReducer(allParametersSetPrecondition, applyBerechnen).result).toEqual({
-                zielbetrag: 70281.00,
-                veraenderung: 0.4,
-                indexe: [{ date: 'Januar 2017', value: 99.6 }, { date: 'Februar 2017', value: 99.8 }, { date: 'März 2017', value: 100.1 }, { date: 'April 2017', value: 100.4 }, { date: 'May 2017', value: 100.6 }, { date: 'Juni 2017', value: 100.7 }, { date: 'July 2017', value: 100.3 }, { date: 'August 2017', value: 100.2 }, { date: 'September 2017', value: 100.2 }, { date: 'Oktober 2017', value: 100.3 }, { date: 'November 2017', value: 100.1 }, { date: 'Dezember 2017', value: 100.0 }, { date: 'Januar 2018', value: 100.0 }]
+                zielbetrag: option.some(70281.00),
+                veraenderung: option.some(0.4),
+                indexe: option.some([{ date: 'Januar 2016', value: 99.6 }, { date: 'Februar 2016', value: 99.8 }, { date: 'März 2016', value: 100.1 }, { date: 'April 2016', value: 100.4 }, { date: 'Mai 2016', value: 100.6 }, { date: 'Juni 2016', value: 100.7 }, { date: 'Juli 2016', value: 100.3 }, { date: 'August 2016', value: 100.2 }, { date: 'September 2016', value: 100.2 }, { date: 'Oktober 2016', value: 100.3 }, { date: 'November 2016', value: 100.1 }, { date: 'Dezember 2016', value: 100.0 }, { date: 'Januar 2017', value: 100.0 }])
             })
         });
     });
 });
 
 
-const berchnungsdaten: TeuerungsrechnerdatenDto = {
+const berechnungsdaten: TeuerungsrechnerdatenDto = {
     timeDimension: [
         { id: 1, month: 1, year: 2016, name: 'Januar 2016' },
         { id: 2, month: 2, year: 2016, name: 'Februar 2016' },
@@ -503,6 +555,5 @@ const berchnungsdaten: TeuerungsrechnerdatenDto = {
         { timeDim: 22, indexDim: 10, indexValue: 100.9 },
         { timeDim: 23, indexDim: 10, indexValue: 100.9 },
         { timeDim: 24, indexDim: 10, indexValue: 100.8 },
-
     ],
 }
