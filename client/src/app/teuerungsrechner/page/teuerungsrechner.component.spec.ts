@@ -43,7 +43,7 @@ describe('teuerungsrechner component spec', () => {
         fixture.detectChanges();
       });
 
-    // on resultat changed -> set inputs
+    // on resultat changed -> set inputs | OK
     // on canBerechnen -> show berechnen button
     // when berechnen clicked -> emit berechnen event
     // when parameter changed -> emit parameters event
