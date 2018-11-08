@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { NgxFpTsModule } from 'ngx-fp-ts';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -31,7 +31,7 @@ export const metaReducers: MetaReducer<any>[] = [
     StoreModule.forRoot({}, {metaReducers}),
     TeuerungsrechnerModule
   ],
-  providers: [],
+  providers: [{ provide: LOCALE_ID, useValue: 'de-CH' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
