@@ -18,5 +18,5 @@ Feature: Als Privatperson möchte ich für einen gewissen Zeitraum die Teuerung 
         And eine Teuerung für die Index-Basis: "Dezember 2015" eingebe
         And die Teuerung berechne
         Then werden folgende Indexe aufgelistet
-            | Januar 2017 | Februar 2017 | März 2017 | April 2017 | May 2017 | Juni 2017 | July 2017 | August 2017 | September 2017 | Oktober 2017 | November 2017 | Dezember 2017 | Januar 2018 |
+            | Januar 2016 | Februar 2016 | März 2016 | April 2016 | May 2016 | Juni 2016 | July 2016 | August 2016 | September 2016 | Oktober 2016 | November 2016 | Dezember 2016 | Januar 2017 |
             | 99.6        | 99.8         | 100.1     | 100.4      | 100.6    | 100.7     | 100.3     | 100.2       | 100.2          | 100.3        | 100.1         | 100.0         | 100.0       |
