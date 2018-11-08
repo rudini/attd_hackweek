@@ -1,5 +1,3 @@
-import { Option } from "fp-ts/lib/Option";
-
 export interface BerechnungsParameterModel {
     startdatum: string;
     zieldatum: string;

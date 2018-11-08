@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import localeDECH from '@angular/common/locales/de-CH';
 import { registerLocaleData } from "@angular/common";
+import { ReactiveFormsModule } from '@angular/forms';
 registerLocaleData(localeDECH);
 
 @NgModule({
@@ -14,7 +15,8 @@ registerLocaleData(localeDECH);
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgxFpTsModule
+    NgxFpTsModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

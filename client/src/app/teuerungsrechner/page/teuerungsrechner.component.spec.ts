@@ -1,16 +1,26 @@
 import { TestBed, ComponentFixture, async } from '@angular/core/testing';
 import { Component, Input, LOCALE_ID, EventEmitter } from '@angular/core';
-import { ResultModel } from '@teuerungsrechner/models';
+import { ResultModel, BerechnungsParameterModel } from '@teuerungsrechner/models';
 import * as option from 'fp-ts/lib/Option';
 import { NgxFpTsModule } from 'ngx-fp-ts';
 import localeDECH from '@angular/common/locales/de-CH';
 import { registerLocaleData } from '@angular/common';
 import { cold } from 'jest-marbles';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, shareReplay, tap } from 'rxjs/operators';
 
 registerLocaleData(localeDECH);
 // impl
 @Component({
     template: `
+    <form [formGroup]="form">
+        <label for="startdatum">Startdatum: </label><input id="startdatum" formControlName="startdatum" data-e2e="startdatum" type="text">
+        <label for="zieldatum">Startdatum: </label><input id="zieldatum" formControlName="zieldatum" data-e2e="zieldatum" type="text">
+        <label for="betrag">Startdatum: </label><input id="betrag" formControlName="betrag" data-e2e="betrag" type="number">
+        <label for="indexbasis">Startdatum: </label><input id="indexbasis" formControlName="indexbasis" data-e2e="indexbasis" type="text">
+    </form>
     <ng-container *ifSome="berechnungsdaten; let berechnungsdaten">
     <p data-e2e="zielbetrag">{{berechnungsdaten.zielbetrag | number:'1.2-2'}}</p>
     </ng-container>
@@ -24,7 +34,25 @@ export class TeuerungsrechnerComponent {
     canBerechnen: boolean;
     onBerechnenClicked$ = new EventEmitter();
 
-    constructor() {}
+    form: FormGroup;
+    // parameterChanged$ = new EventEmitter<BerechnungsParameterModel>();
+    parameterChanged$: Observable<BerechnungsParameterModel>;
+
+    constructor(formBuilder: FormBuilder) {
+        this.form = formBuilder.group({
+            startdatum: '',
+            zieldatum: '',
+            betrag: '',
+            indexbasis: '',
+        });
+
+        this.parameterChanged$ = this.form.valueChanges.pipe(map(data => ({
+            startdatum: data.startdatum,
+            zieldatum: data.zieldatum,
+            betrag: +data.betrag,
+            indexbasis: data.indexbasis,
+        })), shareReplay(1));
+    }
 }
 
 // impl ends
@@ -35,7 +63,7 @@ describe('teuerungsrechner component spec', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            imports: [NgxFpTsModule],
+            imports: [NgxFpTsModule, ReactiveFormsModule],
             declarations: [TeuerungsrechnerComponent],
             providers: [{ provide: LOCALE_ID, useValue: 'de-CH' }],
         }).compileComponents();
@@ -88,7 +116,7 @@ describe('teuerungsrechner component spec', () => {
             fixture.detectChanges();
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
-             // Assert
+            // Assert
             expect((node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).disabled).toBe(false);
         });
         it('it should disable the berechnen button if can berechnen is false', () => {
@@ -97,7 +125,7 @@ describe('teuerungsrechner component spec', () => {
             fixture.detectChanges();
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
-             // Assert
+            // Assert
             expect((node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).disabled).toBe(true);
         });
     });
@@ -107,13 +135,37 @@ describe('teuerungsrechner component spec', () => {
             // Assert
             testee.canBerechnen = true;
             fixture.detectChanges();
-            const node: HTMLElement = fixture.elementRef.nativeElement;           
-            
+            const node: HTMLElement = fixture.elementRef.nativeElement;
+
             // Act
             (node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).click();
 
             // Assert
-            expect(testee.onBerechnenClicked$).toBeObservable(cold('a', { a: ''}));
+            expect(testee.onBerechnenClicked$).toBeObservable(cold('a', { a: '' }));
+        });
+    });
+
+    describe('on parameter changed', () => {
+        it('it should parameters changed event', () => {
+            const subscription = testee.parameterChanged$.subscribe();
+            // Act
+            testee.form.setValue({
+                startdatum: 'Januar 2016',
+                zieldatum: 'Januar 2017',
+                betrag: '70000.00',
+                indexbasis: 'Dezember 2015',
+            });
+            fixture.detectChanges();
+
+            // Assert
+            const expected: BerechnungsParameterModel = {
+                startdatum: 'Januar 2016',
+                zieldatum: 'Januar 2017',
+                betrag: 70000,
+                indexbasis: 'Dezember 2015',
+            };
+            expect(testee.parameterChanged$).toBeObservable(cold('a', { a: expected }));
+            subscription.unsubscribe();
         });
     });
 });
