@@ -67,7 +67,7 @@ describe('teuerungsrechner component spec', () => {
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Assert
-            expect(node.querySelector('[data-e2e="zielbetrag"]').innerHTML).toBe('70’281.00');
+            expect(node.querySelector('[data-test="zielbetrag"]').innerHTML).toBe('70’281.00');
         });
 
         it('it should set veraenderung', () => {
@@ -79,7 +79,7 @@ describe('teuerungsrechner component spec', () => {
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Assert
-            expect(node.querySelector('[data-e2e="veraenderung"]').innerHTML).toBe('0.4%');
+            expect(node.querySelector('[data-test="veraenderung"]').innerHTML).toBe('0.4%');
         });
 
         it('it should set indexe', () => {
@@ -92,13 +92,13 @@ describe('teuerungsrechner component spec', () => {
 
             const getElementsFromTable = (table: HTMLElement, name: string) => {
                 let values = [];
-                table.querySelectorAll(`[data-e2e="${name}"]`).forEach(x => values.push(x.innerHTML));
+                table.querySelectorAll(`[data-test="${name}"]`).forEach(x => values.push(x.innerHTML));
                 return values;
             }
 
             // Assert
-            expect(getElementsFromTable(node.querySelector('[data-e2e="indexe"]'), 'index-header')).toEqual(["Januar 2016", "Februar 2016", "März 2016", "April 2016", "Mai 2016", "Juni 2016", "Juli 2016", "August 2016", "September 2016", "Oktober 2016", "November 2016", "Dezember 2016", "Januar 2017"]);
-            expect(getElementsFromTable(node.querySelector('[data-e2e="indexe"]'), 'index-value')).toEqual(["99.6", "99.8", "100.1", "100.4", "100.6", "100.7", "100.3", "100.2", "100.2", "100.3", "100.1", "100.0", "100.0"]);
+            expect(getElementsFromTable(node.querySelector('[data-test="indexe"]'), 'index-header')).toEqual(["Januar 2016", "Februar 2016", "März 2016", "April 2016", "Mai 2016", "Juni 2016", "Juli 2016", "August 2016", "September 2016", "Oktober 2016", "November 2016", "Dezember 2016", "Januar 2017"]);
+            expect(getElementsFromTable(node.querySelector('[data-test="indexe"]'), 'index-value')).toEqual(["99.6", "99.8", "100.1", "100.4", "100.6", "100.7", "100.3", "100.2", "100.2", "100.3", "100.1", "100.0", "100.0"]);
         });
     });
 
@@ -110,7 +110,7 @@ describe('teuerungsrechner component spec', () => {
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Assert
-            expect((node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).disabled).toBe(false);
+            expect((node.querySelector('[data-test="berechnen"]') as HTMLInputElement).disabled).toBe(false);
         });
         it('it should disable the berechnen button if can berechnen is false', () => {
             // Act
@@ -119,7 +119,7 @@ describe('teuerungsrechner component spec', () => {
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Assert
-            expect((node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).disabled).toBe(true);
+            expect((node.querySelector('[data-test="berechnen"]') as HTMLInputElement).disabled).toBe(true);
         });
     });
 
@@ -131,7 +131,7 @@ describe('teuerungsrechner component spec', () => {
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
             // Act
-            (node.querySelector('[data-e2e="berechnen"]') as HTMLInputElement).click();
+            (node.querySelector('[data-test="berechnen"]') as HTMLInputElement).click();
 
             // Assert
             expect(testee.onBerechnenClicked$).toBeObservable(cold('a', { a: '' }));

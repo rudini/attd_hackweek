@@ -5,9 +5,9 @@ Feature: Als Privatperson möchte ich für einen gewissen Zeitraum die Teuerung 
         When ich ein Lohn von 70000.00 CHF
         And ein Startdatum im "Januar 2016"
         And ein Zieldatum im "Januar 2017"
-        And eine Teuerung für die Index-Basis: "Dezember 2015" eingebe 
+        And eine Teuerung für die Index-Basis: "Dezember 2015" eingebe
         And die Teuerung berechne
-        Then wird ein Betrag von 70281.00 CHF
+        Then wird ein Betrag von "70’281.00" CHF
         And eine Veränderung von 0.4 % angezeigt
 
     Scenario: Lohnteuerung Zwischenwerte
