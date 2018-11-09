@@ -6,3 +6,6 @@ To translate feature files to step-definition files you can use the online cucum
 
 * Jest data driven tests do not work due to [jest-preset-angular#169](https://github.com/thymikee/jest-preset-angular/issues/169):  
   https://github.com/sapegin/jest-cheat-sheet#data-driven-tests-jest-23
+
+
+To use the vs code snippets, install: https://marketplace.visualstudio.com/items?itemName=rebornix.project-snippets
