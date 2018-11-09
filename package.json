@@ -12,7 +12,9 @@
     },
     "scripts": {
         "e2e:start": "wait-on -t 20000 http-get://localhost:4200 && wait-for-mongo mongodb://localhost:27017 5000 && cd e2e / && npm test",
+        "e2e:open": "wait-on -t 20000 http-get://localhost:4200 && wait-for-mongo mongodb://localhost:27017 5000 && cd e2e / && npm run test:debug",
         "e2e": "concurrently -n client,server,docker,e2e \"npm:client\" \"npm:server\" \"docker-compose up\" \"npm:e2e:start\"",
+        "e2e:debug": "concurrently -n client,server,docker,e2e \"npm:client\" \"npm:server\" \"docker-compose up\" \"npm:e2e:open\"",
         "client": "cd ./client && npm start",
         "server": "cd ./server && npm start",
         "start": "./node_modules/.bin/concurrently \"npm run server\" \"npm run client\"",
