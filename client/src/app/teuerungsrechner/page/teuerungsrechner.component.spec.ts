@@ -10,10 +10,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { TeuerungsrechnerComponent } from './teuerungsrechner.component';
 
 registerLocaleData(localeDECH);
-// impl
-
-
-// impl ends
 
 describe('teuerungsrechner component spec', () => {
     let testee: TeuerungsrechnerComponent;
