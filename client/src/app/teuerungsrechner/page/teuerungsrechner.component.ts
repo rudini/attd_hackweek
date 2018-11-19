@@ -30,7 +30,7 @@ import * as option from 'fp-ts/lib/Option';
             </tbody>
         </table>
     </ng-container>
-    <button data-test="berechnen" type="submit" (click)="onBerechnenClicked$.emit()" [disabled]="!canBerechnen">Berechnen</button>
+    <button data-test="berechnen" type="submit" (click)="onBerechnenClicked$.emit({})" [disabled]="!canBerechnen">Berechnen</button>
     `,
 })
 export class TeuerungsrechnerComponent {

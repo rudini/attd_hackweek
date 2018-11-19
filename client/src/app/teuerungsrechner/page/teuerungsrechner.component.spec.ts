@@ -8,6 +8,7 @@ import { registerLocaleData } from '@angular/common';
 import { cold } from 'jest-marbles';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TeuerungsrechnerComponent } from './teuerungsrechner.component';
+import { shareReplay } from 'rxjs/operators';
 
 registerLocaleData(localeDECH);
 
@@ -119,18 +120,21 @@ describe('teuerungsrechner component spec', () => {
         });
     });
 
-    describe('on berechnen clicked', () => {
+   describe('on berechnen clicked', () => {
         it('it should emit berechnen event', () => {
             // Assert
             testee.canBerechnen = true;
             fixture.detectChanges();
             const node: HTMLElement = fixture.elementRef.nativeElement;
 
+            const result = testee.onBerechnenClicked$.asObservable().pipe(shareReplay(1));
+            result.subscribe();
+
             // Act
             (node.querySelector('[data-test="berechnen"]') as HTMLInputElement).click();
 
             // Assert
-            expect(testee.onBerechnenClicked$).toBeObservable(cold('a', { a: '' }));
+            expect(result).toBeObservable(cold('a', { a: {} }));
         });
     });
 
